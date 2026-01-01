@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 import { ICON_LIST } from "@/icons/index";
 import { motion } from "motion/react";
 import Link from "next/link";
@@ -12,9 +12,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LINKS } from "@/constants";
 
 export default function IconDetailContent({ slug }: { slug: string }) {
+  const iconRef = useRef<HTMLDivElement>(null);
   const [iconCode, setIconCode] = React.useState<string>("");
   const [codeCopied, setCodeCopied] = React.useState(false);
   const [depCopied, setDepCopied] = React.useState(false);
+
+  // Trigger icon animation on tap for touch devices
+  const handleTapAnimation = () => {
+    const target = iconRef.current?.querySelector("svg, div");
+    if (target) {
+      target.dispatchEvent(new PointerEvent("pointerenter", { bubbles: true }));
+      setTimeout(() => {
+        target.dispatchEvent(
+          new PointerEvent("pointerleave", { bubbles: true }),
+        );
+      }, 1000);
+    }
+  };
 
   const iconData = ICON_LIST.find((icon) => icon.name === slug);
   const IconComponent = iconData?.icon;
@@ -79,7 +93,9 @@ export default function IconDetailContent({ slug }: { slug: string }) {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1 }}
               >
-                <IconComponent size={120} />
+                <div ref={iconRef} onTouchStart={handleTapAnimation}>
+                  <IconComponent size={120} />
+                </div>
               </motion.div>
 
               <motion.h1

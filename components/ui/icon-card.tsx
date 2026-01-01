@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useRef } from "react";
 import { AnimatedIconProps } from "@/icons/types";
 import {
   Tooltip,
@@ -19,8 +21,22 @@ const IconCard = ({
   name: string;
   icon: React.FC<AnimatedIconProps>;
 }) => {
+  const iconRef = useRef<HTMLDivElement>(null);
   const [isCopied, setIsCopied] = React.useState(false);
   const [isCommandCopied, setIsCommandCopied] = React.useState(false);
+
+  // Trigger icon animation on tap for touch devices
+  const handleTapAnimation = () => {
+    const target = iconRef.current?.querySelector("svg, div");
+    if (target) {
+      target.dispatchEvent(new PointerEvent("pointerenter", { bubbles: true }));
+      setTimeout(() => {
+        target.dispatchEvent(
+          new PointerEvent("pointerleave", { bubbles: true }),
+        );
+      }, 1000);
+    }
+  };
   const copyFileToClipboard = async () => {
     const content = await getIconsContent(name);
     console.log(content);
@@ -49,7 +65,9 @@ const IconCard = ({
       >
         <Tooltip>
           <TooltipTrigger>
-            <Icon size={56} />
+            <div ref={iconRef} onTouchStart={handleTapAnimation}>
+              <Icon size={56} />
+            </div>
           </TooltipTrigger>
           <TooltipContent>{name}</TooltipContent>
         </Tooltip>
